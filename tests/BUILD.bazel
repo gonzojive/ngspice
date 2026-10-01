@@ -1,0 +1,11 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+cc_test(
+    name = "sharedspice_test",
+    srcs = ["sharedspice_test.c"],
+    deps = [
+        "//:libngspice",
+        "//:ngspice_headers",
+    ],
+)
+

@@ -1,0 +1,133 @@
+load("@rules_bison//bison:bison.bzl", "bison")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//:sources.bzl", "KLU_COMPLEX_SRCS", "LIBNGSPICE_COMMON_SRCS")
+
+genrule(
+    name = "config_h",
+    srcs = ["src/include/ngspice/config_bazel.h"],
+    outs = ["src/include/ngspice/config.h"],
+    cmd = "cp $< $@",
+)
+
+bison(
+    name = "inpptree-parser",
+    src = "src/spicelib/parser/inpptree-parser.y",
+)
+
+alias(
+    name = "inpptree_parser",
+    actual = ":inpptree-parser",
+)
+
+filegroup(
+    name = "inpptree_parser_hdr",
+    srcs = [":inpptree-parser"],
+    output_group = "cc_hdrs",
+)
+
+bison(
+    name = "parse-bison",
+    src = "src/frontend/parse-bison.y",
+)
+
+alias(
+    name = "parse_bison",
+    actual = ":parse-bison",
+)
+
+filegroup(
+    name = "parse_bison_hdr",
+    srcs = [":parse-bison"],
+    output_group = "cc_hdrs",
+)
+
+cc_library(
+    name = "ngspice_headers",
+    hdrs = glob(
+        [
+            "src/**/*.h",
+            "src/**/*.hpp",
+            "src/include/cppduals/**",
+        ],
+    ) + [
+        ":config_h",
+        ":inpptree_parser_hdr",
+        ":parse_bison_hdr",
+    ],
+    includes = [
+        "src/frontend",
+        "src/include",
+        "src/include/cppduals",
+        "src/maths/poly",
+        "src/spicelib/devices",
+        "src/spicelib/parser",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+NGSPICE_COPTS = [
+    "-std=gnu11",
+    "-fopenmp",
+    "-fPIC",
+    "-DSIMULATOR",
+    "-DSHARED_MODULE",
+]
+
+NGSPICE_LINKOPTS = [
+    "-lm",
+    "-ldl",
+    "-lpthread",
+    "-fopenmp",
+    "-lstdc++",
+]
+
+cc_library(
+    name = "klu_complex",
+    srcs = KLU_COMPLEX_SRCS,
+    copts = NGSPICE_COPTS + ["-DCOMPLEX"],
+    deps = [":ngspice_headers"],
+)
+
+cc_library(
+    name = "ngspice_core",
+    srcs = [f for f in LIBNGSPICE_COMMON_SRCS if f != "src/sharedspice.c"] + [
+        ":inpptree_parser",
+        ":parse_bison",
+    ],
+    copts = NGSPICE_COPTS,
+    linkopts = NGSPICE_LINKOPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":klu_complex",
+        ":ngspice_headers",
+    ],
+)
+
+cc_binary(
+    name = "libngspice.so",
+    srcs = ["src/sharedspice.c"],
+    copts = NGSPICE_COPTS,
+    linkshared = True,
+    visibility = ["//visibility:public"],
+    deps = [":ngspice_core"],
+)
+
+cc_library(
+    name = "libngspice",
+    srcs = ["src/sharedspice.c"],
+    copts = NGSPICE_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [":ngspice_core"],
+)
+
+cc_binary(
+    name = "ngspice",
+    srcs = ["src/main.c"],
+    copts = [
+        "-std=gnu11",
+        "-fopenmp",
+        "-DSIMULATOR",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":ngspice_core"],
+)
