@@ -1,5 +1,7 @@
 # Bazel Build for ngspice
 
+> Authored by Gemini Flash 3.8 on October 1, 2026.
+
 This repository contains a pure Bazel build system for **ngspice** and **libngspice**, designed for hermeticity, reproducibility, and seamless consumption by downstream projects such as [kicad-bazel](https://github.com/gonzojive/kicad-bazel).
 
 ---
