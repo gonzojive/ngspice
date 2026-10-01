@@ -1635,3 +1635,73 @@ int main(int argc, char **argv)
         }
     }
 } /* end of function main */
+
+/* Stubs for linking with ngspice_core when built with SHARED_MODULE */
+#include <pthread.h>
+#include <stdarg.h>
+
+pthread_mutex_t vecreallocMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t allocMutex = PTHREAD_MUTEX_INITIALIZER;
+
+int sh_printf(const char *format, ...) {
+    va_list ap;
+    va_start(ap, format);
+    int ret = vprintf(format, ap);
+    va_end(ap);
+    return ret;
+}
+
+int sh_fprintf(FILE *fd, const char *format, ...) {
+    va_list ap;
+    va_start(ap, format);
+    int ret = vfprintf(fd, format, ap);
+    va_end(ap);
+    return ret;
+}
+
+int sh_vfprintf(FILE *fd, const char *format, va_list args) {
+    return vfprintf(fd, format, args);
+}
+
+int sh_fputs(const char *input, FILE *fd) {
+    return fputs(input, fd);
+}
+
+int sh_fputc(int input, FILE *fd) {
+    return fputc(input, fd);
+}
+
+int sh_putc(int input, FILE *fd) {
+    return putc(input, fd);
+}
+
+void SetAnalyse(const char *analyse, int percent) {
+    (void)analyse;
+    (void)percent;
+}
+
+int exec_controls(void) { return 0; }
+void rem_controls(void) {}
+void sh_delete_myvec(void) {}
+void sh_vecinit(void) {}
+void sh_ExecutePerLoop(void) {}
+void shared_exit(int code) { exit(code); }
+void add_bkpt(double time) { (void)time; }
+int sharedsync(double *actualtime, double *delta, double olddelta, double maxstep, double finaltime, int redstep, int *action, int loc) {
+    (void)actualtime; (void)delta; (void)olddelta; (void)maxstep; (void)finaltime; (void)redstep; (void)action; (void)loc;
+    return 0;
+}
+int getisrcval(char *name, double time, double *val) {
+    (void)name; (void)time; (void)val;
+    return 0;
+}
+int getvsrcval(char *name, double time, double *val) {
+    (void)name; (void)time; (void)val;
+    return 0;
+}
+int shared_send_dict(char *name) { (void)name; return 0; }
+int shared_send_event(char *name, double time, double step, double val) {
+    (void)name; (void)time; (void)step; (void)val;
+    return 0;
+}
+

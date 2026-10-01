@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "vcxproj",
+    srcs = ["vcxproj.go"],
+    importpath = "github.com/gonzojive/ngspice/tools/internal/vcxproj",
+    visibility = ["//tools:__subpackages__"],
+)
+
+go_test(
+    name = "vcxproj_test",
+    srcs = ["vcxproj_test.go"],
+    deps = [":vcxproj"],
+)

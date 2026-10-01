@@ -1,0 +1,31 @@
+name: Bazel CI
+
+on:
+  push:
+    branches: [ "master", "bazel" ]
+  pull_request:
+    branches: [ "master", "bazel" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@v0.8.5
+        with:
+          bazel-version: 8.x
+
+      - name: Verify generated sources.bzl is up to date
+        run: bazel run //tools/gen_bazel -- --check
+
+      - name: Build all targets
+        run: bazel build //...
+
+      - name: Run all tests
+        run: bazel test //... --test_output=errors
+
+      - name: Test ngspice CLI executable
+        run: bazel run //:ngspice -- --version
