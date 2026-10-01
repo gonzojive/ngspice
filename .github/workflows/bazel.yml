@@ -13,10 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Bazel
-        uses: bazel-contrib/setup-bazel@v0.8.5
-        with:
-          bazel-version: 8.x
+      - name: Set up Bazelisk
+        uses: bazelbuild/setup-bazelisk@v3
 
       - name: Verify generated sources.bzl is up to date
         run: bazel run //tools/gen_bazel -- --check
